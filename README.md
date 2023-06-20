@@ -1,2 +1,2 @@
 # Housefinder
-Python bot to help student's find accommodation in the Netherlands
+Python bot to help students find accommodation in the Netherlands
