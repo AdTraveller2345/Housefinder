@@ -6,7 +6,13 @@ import sqlite3
 import time
 import subprocess
 import random
-
+#1.In telegram search for the bot called Botfather
+#2.Start a conversation with it and create a new bot
+#3.Name your bot whatever you want
+#4.Copy the API token you get for your bot. Paste into line 16
+#5.Message userinfobot and paste your ID into line 17
+#6.Set your search preferences and run the code
+    
 api_token = ''  # API token for your bot
 chat_id = ''  # Your Telegram chat ID
 # set your search preferences
