@@ -18,7 +18,7 @@ chat_id = ''  # Your Telegram chat ID
 # set your search preferences
 city_names = ('eindhoven','tilburg','helmond','den-bosch')  # preferred cities
 room_types = ('a','h','r','s')  # preferred type of accommodation 'a' = apartment, 'h' = house, 'r' = room 's' = studio
-refresh_interval = [3,5]  # set a random interval for how often should the program rerun itself
+refresh_interval = [1,2]  # set a random interval for how often should the program rerun itself
 max_rent = 15000
 def main():
     # set up connection with the database
