@@ -2,6 +2,7 @@
 PURPOSE:
 It can be really challanging to find housing in the Netherlands. The number of available offers is usually low, therefore many students apply for the same room. This result in the landlord considering only the first couple applicants. Thus being fast plays a crucial role in your journey.
 This program aims to help you with that. Kamernet sends you emails about new listings but these are usually a couple minutes late, for pararius its even worse. This program scrapes these websites every 1-2 minutes and if a new item shows up it sends you an instant message via telegram. (see the attached photo to get an idea of what these messages look like)
+
 HOW TO USE:  
   Running it on your local computer:
   This is the easier way, but this result in the app only working when you are running it on your computer.
