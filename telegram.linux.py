@@ -4,14 +4,14 @@ from telegram import Bot
 import sqlite3
 import time
 import random
-
-api_token = ''  # API token for your bot
-chat_id = ''  # Your Telegram chat ID
+import asyncio
+api_token = '7857522620:AAEuvfIEXoEy0RyfR445iUfKD1eCPGVeznA'  # API token for your bot
+chat_id = '7724845710'  # Your Telegram chat ID
 # set your search preferences
-city_names = ('eindhoven','tilburg','helmond','den-bosch')  # preferred cities
+city_names = ('eindhoven',"helmon")  # preferred cities
 room_types = ('a','h','r','s')  # preferred type of accommodation 'a' = apartment, 'h' = house, 'r' = room 's' = studio
 refresh_interval = [1,2]  # set a random interval for how often should the program rerun itself
-max_rent = 1100 #set your max rent
+max_rent = 1500 #set your max rent
 while True:
     # set up connection with the database
     connection = sqlite3.connect("listings.db")  # you can specify the location and name of the database
@@ -30,24 +30,43 @@ while True:
                     price = int(element.replace('€', '').replace(',', ''))
                     break
             roomtype = link[1]
+            print(roomtype)
             link = 'https://www.pararius.com' + link
             if roomtype in room_types and max_rent >= price:
                 info = [link, city, roomtype, price, 0]
                 cursor.execute("INSERT OR IGNORE INTO room (link, city, type, price,notified) VALUES (?,?,?,?,?)", info)
-
     # get listings from kamernet
     for city in city_names:
-        html_text = requests.get('https://kamernet.nl/en/for-rent/rooms-' + city).text
+        url = f'https://kamernet.nl/en/for-rent/rooms-{city}'
+        html_text = requests.get(url).text
         soup = BeautifulSoup(html_text, 'lxml')
-        listings = soup.find_all('div', id=lambda value: value and value.startswith('roomAdvert_'))
-        for a in listings[:5]:
-            link = a.find('a', class_="tile-title truncate")['href']
-            roomtype = a.find('div', class_="tile-room-type").text.strip()[2:3].lower()
-            price = int(a.find('div', class_="tile-rent").text.strip().split()[1][:-2])
-            if roomtype in room_types and max_rent >= price:
-                info = [link, city, roomtype, price, 0]
-                cursor.execute("INSERT OR IGNORE INTO room (link, city, type, price,notified) VALUES (?,?,?,?,?)", info)
 
+        # Updated <a> tag class to match new structure
+        listings = soup.find_all('a', class_="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineNone MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root ListingCard_root__e9Z81 mui-style-i2963i")
+        print(f"{city}: Found {len(listings)} listings")
+
+        for listing in listings:  # Limit to first 5
+            try:
+                # Extract link
+                link = listing['href']
+
+                # Extract price
+                price_tag = listing.find('span', class_="MuiTypography-root MuiTypography-h5 mui-style-1pios4g")
+                price_text = price_tag.text.strip().replace('€', '').replace(',', '')
+                price = int(''.join(filter(str.isdigit, price_text)))
+
+                # Extract accommodation type
+                type_tag = listing.find('p', class_="MuiTypography-root MuiTypography-body2 MuiTypography-noWrap mui-style-1i83cky")
+                roomtype_raw = type_tag.text.strip().lower()
+                #print(f"kamernet {roomtype_raw}")
+                roomtype_code = roomtype_raw[0]  # Assuming first letter maps to 'r', 's', etc.
+
+                if roomtype_code in room_types and price <= max_rent:
+                    info = ['https://kamernet.nl'+link, city, roomtype_code, price, False]
+                    cursor.execute("INSERT OR IGNORE INTO room (link, city, type, price, notified) VALUES (?,?,?,?,?)", info)
+
+            except Exception as e:
+                print(f"Error parsing listing in {city}: {e}")
     roomtypes = {
         'a':'apartment',
         's':'studio',
@@ -55,18 +74,21 @@ while True:
         'r':'room'
     }
 
-    def send_telegram_message(link,city, roomtype,price):
+    async def send_telegram_message(link,city, roomtype,price):
         bot = Bot(token=api_token)
 
         message = f'New {roomtypes[roomtype]} available for rent in {city} for {price}€! \nLink:\n{link}'
-        bot.send_message(chat_id=chat_id, text=message)
+        resp = await bot.send_message(chat_id=chat_id, text=message)
+        print("Telegram response:", resp)
+    
 
     advertinfo = cursor.execute("SELECT * FROM room WHERE notified = 0").fetchone()
     while advertinfo is not None:
         update_query = "UPDATE room SET notified = ? WHERE link = ?"
         cursor.execute(update_query, (1, advertinfo[0]))
         # Create and run the event loop
-        send_telegram_message(advertinfo[0], advertinfo[1], advertinfo[2], advertinfo[3])
+        asyncio.run(send_telegram_message(advertinfo[0], advertinfo[1], advertinfo[2], advertinfo[3]))
+        print("done")
         advertinfo = cursor.execute("SELECT * FROM room WHERE notified = 0").fetchone()
 
     # finalize the changes and exit the database

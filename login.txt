@@ -1,0 +1,1 @@
+ssh -i Documents\fontos\housing\houseFinderKey.pem ec2-user@ec2-16-171-52-131.eu-north-1.compute.amazonaws.com

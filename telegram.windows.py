@@ -13,16 +13,16 @@ import random
 #5.Message userinfobot and paste your ID into line 17
 #6.Set your search preferences and run the code
 
-api_token = ''  # API token for your bot
-chat_id = ''  # Your Telegram chat ID
+api_token = '7857522620:AAEuvfIEXoEy0RyfR445iUfKD1eCPGVeznA'  # API token for your bot
+chat_id = '7724845710'  # Your Telegram chat ID
 # set your search preferences
-city_names = ('eindhoven','tilburg','helmond','den-bosch')  # preferred cities
+city_names = ('eindhoven')  # preferred cities
 room_types = ('a','h','r','s')  # preferred type of accommodation 'a' = apartment, 'h' = house, 'r' = room 's' = studio
 refresh_interval = [1,2]  # set a random interval for how often should the program rerun itself
 max_rent = 15000
 def main():
     # set up connection with the database
-    connection = sqlite3.connect("D:/listings2.db")  # you can specify the location and name of the database
+    connection = sqlite3.connect("listings2.db")  # you can specify the location and name of the database
     cursor = connection.cursor()
 
     # create table and fill it with contents from pararius
@@ -42,7 +42,7 @@ def main():
             if roomtype in room_types and max_rent >= price:
                 info = [link, city, roomtype, price, False]
                 cursor.execute("INSERT OR IGNORE INTO room (link, city, type, price,notified) VALUES (?,?,?,?,?)", info)
-
+    print("kuki")
     # get listings from kamernet
     for city in city_names:
         html_text = requests.get('https://kamernet.nl/en/for-rent/rooms-' + city).text
